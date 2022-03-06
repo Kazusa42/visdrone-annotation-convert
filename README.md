@@ -3,7 +3,7 @@ Convert the annotation of visdrone dataset (http://aiskyeye.com/) to _xml_ forma
 
 ## visdrone annotation (https://github.com/VisDrone/VisDrone2018-DET-toolkit)
 
- <bbox_left>,<bbox_top>,<bbox_width>,<bbox_height>,<score>,<object_category>,<truncation>,<occlusion>
+  <bbox_left>,<bbox_top>,<bbox_width>,<bbox_height>,<score>,<object_category>,<truncation>,<occlusion>
 
 
     Name                                                  Description
@@ -33,4 +33,3 @@ Convert the annotation of visdrone dataset (http://aiskyeye.com/) to _xml_ forma
                      The score in the GROUNDTRUTH file indicates the fraction of objects being occluded (i.e., no occlusion = 0 
                      (occlusion ratio 0%), partial occlusion = 1 (occlusion ratio 1% ~ 50%), and heavy occlusion = 2 
                      (occlusion ratio 50% ~ 100%)).
-  
