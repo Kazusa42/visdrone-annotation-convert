@@ -1,5 +1,5 @@
 # visdrone-annotation-convert
-Convert the annotation of visdrone dataset (http://aiskyeye.com/) to _xml_ format
+Convert the annotation of visdrone dataset (http://aiskyeye.com/) to voc-style _xml_ format
 
 ## visdrone annotation (https://github.com/VisDrone/VisDrone2018-DET-toolkit)
 
