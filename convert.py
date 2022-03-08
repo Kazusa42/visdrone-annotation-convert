@@ -1,135 +1,72 @@
-
-"""
-convert visdrone annotation to voc-styel annotation (xml file)
-txt file content：
-<bbox_left>,<bbox_top>,<bbox_width>,<bbox_height>,<score>,<object_category>,<truncation>,<occlusion>
-
-classes：
-ignored regions(0), pedestrian(1),
-people(2), bicycle(3), car(4), van(5),
-truck(6), tricycle(7), awning-tricycle(8),
-bus(9), motor(10), others(11)
-"""
-
 import os
-import cv2
-import time
-from xml.dom import minidom
+from PIL import Image
 
-name_dict = {'0': 'ignored regions', '1': 'pedestrian', '2': 'people',
-             '3': 'bicycle', '4': 'car', '5': 'van', '6': 'truck',
-             '7': 'tricycle', '8': 'awning-tricycle', '9': 'bus',
-             '10': 'motor', '11': 'others'}
+root_dir = r"C:\Users\lyin0\Desktop\VisDrone2019-DET-train/"  # visdrone dataset path
+annotations_dir = root_dir + "annotations/"
+image_dir = root_dir + "images/"
+xml_dir = root_dir + "Annotations_XML/"  # output xml file path
 
+""" visdrone classes, please do not change the order """
+class_name = ['ignored regions', 'pedestrian', 'people', 'bicycle', 'car', 'van', 'truck', 'tricycle',
+              'awning-tricycle', 'bus', 'motor', 'others']
 
-def transfer_to_xml(pic, txt, file_name):
-    xml_save_path = 'xml'  # path for store xml files
-    if not os.path.exists(xml_save_path):
-        os.mkdir(xml_save_path)
+for filename in os.listdir(annotations_dir):
+    fin = open(annotations_dir + filename, 'r')
+    image_name = filename.split('.')[0]
+    img = Image.open(image_dir + image_name + ".jpg")
+    xml_name = xml_dir + image_name + '.xml'
+    with open(xml_name, 'w') as fout:
+        fout.write('<annotation>' + '\n')
 
-    img = cv2.imread(pic)
-    img_w = img.shape[1]
-    img_h = img.shape[0]
-    img_d = img.shape[2]
-    doc = minidom.Document()
+        fout.write('\t' + '<folder>VOC2007</folder>' + '\n')
+        fout.write('\t' + '<filename>' + image_name + '.jpg' + '</filename>' + '\n')
 
-    annotation = doc.createElement("annotation")
-    doc.appendChild(annotation)
-    folder = doc.createElement('folder')
-    folder.appendChild(doc.createTextNode('visdrone'))
-    annotation.appendChild(folder)
+        fout.write('\t' + '<source>' + '\n')
+        fout.write('\t\t' + '<database>' + 'VisDrone2019 Database' + '</database>' + '\n')
+        fout.write('\t\t' + '<annotation>' + 'VisDrone2019' + '</annotation>' + '\n')
+        fout.write('\t\t' + '<image>' + 'flickr' + '</image>' + '\n')
+        fout.write('\t\t' + '<flickrid>' + 'Unspecified' + '</flickrid>' + '\n')
+        fout.write('\t' + '</source>' + '\n')
 
-    filename = doc.createElement('filename')
-    filename.appendChild(doc.createTextNode(file_name))
-    annotation.appendChild(filename)
+        fout.write('\t' + '<owner>' + '\n')
+        fout.write('\t\t' + '<flickrid>' + 'Kazusa' + '</flickrid>' + '\n')
+        fout.write('\t\t' + '<name>' + 'Kazusa' + '</name>' + '\n')
+        fout.write('\t' + '</owner>' + '\n')
 
-    source = doc.createElement('source')
-    database = doc.createElement('database')
-    database.appendChild(doc.createTextNode("Unknown"))
-    source.appendChild(database)
+        fout.write('\t' + '<size>' + '\n')
+        fout.write('\t\t' + '<width>' + str(img.size[0]) + '</width>' + '\n')
+        fout.write('\t\t' + '<height>' + str(img.size[1]) + '</height>' + '\n')
+        fout.write('\t\t' + '<depth>' + '3' + '</depth>' + '\n')
+        fout.write('\t' + '</size>' + '\n')
 
-    annotation.appendChild(source)
+        fout.write('\t' + '<segmented>' + '0' + '</segmented>' + '\n')
 
-    size = doc.createElement('size')
-    width = doc.createElement('width')
-    width.appendChild(doc.createTextNode(str(img_w)))
-    size.appendChild(width)
-    height = doc.createElement('height')
-    height.appendChild(doc.createTextNode(str(img_h)))
-    size.appendChild(height)
-    depth = doc.createElement('depth')
-    depth.appendChild(doc.createTextNode(str(img_d)))
-    size.appendChild(depth)
-    annotation.appendChild(size)
+        for line in fin.readlines():
+            line = line.split(',')
+            fout.write('\t' + '<object>' + '\n')
+            fout.write('\t\t' + '<name>' + class_name[int(line[5])] + '</name>' + '\n')
+            fout.write('\t\t' + '<pose>' + 'Unspecified' + '</pose>' + '\n')
+            fout.write('\t\t' + '<truncated>' + line[6] + '</truncated>' + '\n')
+            diff = int(line[7])
+            """
+            according to param "occlusion" change the param "difficult" in voc annotation
+            no occlusion = 0 (occlusion ratio 0%) -> difficult = 0 (easy to detect)
+            partial occlusion = 1 (occlusion ratio 1% ~ 50%) -> difficult = 0 (easy to detect)
+            heavy occlusion = 2 (occlusion ratio 50% ~ 100%) -> difficult = 1 (difficult to detect)
+            """
+            if diff == 0 or diff == 1:
+                diff = 0
+            elif diff == 2:
+                diff = 1
+            fout.write('\t\t' + '<difficult>' + str(diff) + '</difficult>' + '\n')
+            fout.write('\t\t' + '<bndbox>' + '\n')
+            fout.write('\t\t\t' + '<xmin>' + line[0] + '</xmin>' + '\n')
+            fout.write('\t\t\t' + '<ymin>' + line[1] + '</ymin>' + '\n')
+            # pay attention to this point!(0-based)
+            fout.write('\t\t\t' + '<xmax>' + str(int(line[0]) + int(line[2]) - 1) + '</xmax>' + '\n')
+            fout.write('\t\t\t' + '<ymax>' + str(int(line[1]) + int(line[3]) - 1) + '</ymax>' + '\n')
+            fout.write('\t\t' + '</bndbox>' + '\n')
+            fout.write('\t' + '</object>' + '\n')
 
-    segmented = doc.createElement('segmented')
-    segmented.appendChild(doc.createTextNode("0"))
-    annotation.appendChild(segmented)
-
-    with open(txt, 'r') as f:
-        lines = [f.readlines()]
-        for line in lines:
-            for boxes in line:
-                box = boxes.strip('\n')
-                box = box.split(',')
-                x_min = box[0]
-                y_min = box[1]
-                x_max = int(box[0]) + int(box[2])
-                y_max = int(box[1]) + int(box[3])
-                object_name = name_dict[box[5]]
-
-                # if object_name is 'ignored regions' or 'others':
-                #     continue
-
-                object = doc.createElement('object')
-                nm = doc.createElement('name')
-                nm.appendChild(doc.createTextNode(object_name))
-                object.appendChild(nm)
-                pose = doc.createElement('pose')
-                pose.appendChild(doc.createTextNode("Unspecified"))
-                object.appendChild(pose)
-                truncated = doc.createElement('truncated')
-                truncated.appendChild(doc.createTextNode("1"))
-                object.appendChild(truncated)
-                difficult = doc.createElement('difficult')
-                difficult.appendChild(doc.createTextNode("0"))
-                object.appendChild(difficult)
-                bndbox = doc.createElement('bndbox')
-                xmin = doc.createElement('xmin')
-                xmin.appendChild(doc.createTextNode(x_min))
-                bndbox.appendChild(xmin)
-                ymin = doc.createElement('ymin')
-                ymin.appendChild(doc.createTextNode(y_min))
-                bndbox.appendChild(ymin)
-                xmax = doc.createElement('xmax')
-                xmax.appendChild(doc.createTextNode(str(x_max)))
-                bndbox.appendChild(xmax)
-                ymax = doc.createElement('ymax')
-                ymax.appendChild(doc.createTextNode(str(y_max)))
-                bndbox.appendChild(ymax)
-                object.appendChild(bndbox)
-                annotation.appendChild(object)
-                with open(os.path.join(xml_save_path, file_name + '.xml'), 'w') as x:
-                    x.write(doc.toprettyxml())
-                x.close()
-    f.close()
-
-
-if __name__ == '__main__':
-    t = time.time()
-    print('Transfer .txt to .xml...ing....')
-    txt_folder = r'C:\Users\lyin0\Desktop\VisDrone2019-DET-train\annotations'  # visdrone annotation folder
-    txt_file = os.listdir(txt_folder)
-    img_folder = r'C:\Users\lyin0\Desktop\VisDrone2019-DET-train\images'  # visdrone images folder
-
-    for txt in txt_file:
-        txt_full_path = os.path.join(txt_folder, txt)
-        img_full_path = os.path.join(img_folder, txt.split('.')[0] + '.jpg')
-
-        try:
-            transfer_to_xml(img_full_path, txt_full_path, txt.split('.')[0])
-        except Exception as e:
-            print(e)
-
-    print("Transfer .txt to .XML sucessed. costed: {:.3f}s...".format(time.time() - t))
-
+        fin.close()
+        fout.write('</annotation>')
