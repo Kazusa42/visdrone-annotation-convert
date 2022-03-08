@@ -1,4 +1,4 @@
-This is a script for converting visdrone annotation (txt format) into voc-style annotation (xml format)
+# This is a script for converting visdrone annotation (txt format) into voc-style annotation (xml format)
 
 ## VisDrone dataset (https://github.com/VisDrone)
 Submission of the results will consist of TXT files with one line per predicted object.It looks as follows:
@@ -36,15 +36,19 @@ Submission of the results will consist of TXT files with one line per predicted 
    ------------------------------------------------------------------------------------------------------------------------------
 
 ## VisDrone Classes
-   ignored regions  
-   pedestrian  
-   people  
-   bicycle  
-   car  
-   van  
-   truck  
-   tricycle  
-   awning-tricycle  
-   bus  
-   motor  
-   others  
+   ignored regions   
+   pedestrian   
+   people   
+   bicycle   
+   car   
+   van   
+   truck   
+   tricycle   
+   awning-tricycle   
+   bus   
+   motor   
+   others   
+
+## Notice
+1. this script will set param "difficult" in voc annotation according to param "occlusion" in visdrone annotation.  
+   In particulary,  
