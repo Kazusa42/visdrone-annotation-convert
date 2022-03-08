@@ -21,7 +21,7 @@ Submission of the results will consist of TXT files with one line per predicted 
                          The score in GROUNDTRUTH file is set to 1 or 0. 1 indicates the bounding box is considered in evaluation, 
                          while 0 indicates the bounding box will be ignored.
                           
-    <object_category>    The object category indicates the type of annotated object, (i.e., ignored regions(0), pedestrian(1), 
+    <object_category>    The object category indicates the type of annotated object, (ignored regions(0), pedestrian(1), 
                          people(2), bicycle(3), car(4), van(5), truck(6), tricycle(7), awning-tricycle(8), bus(9), motor(10), 
                          others(11))
                           
@@ -33,22 +33,12 @@ Submission of the results will consist of TXT files with one line per predicted 
                          The score in the GROUNDTRUTH file indicates the fraction of objects being occluded (i.e., no occlusion = 0 
                          (occlusion ratio 0%), partial occlusion = 1 (occlusion ratio 1% ~ 50%), and heavy occlusion = 2 
                          (occlusion ratio 50% ~ 100%)).
-   ------------------------------------------------------------------------------------------------------------------------------
-
-## VisDrone Classes
-   ignored regions   
-   pedestrian   
-   people   
-   bicycle   
-   car   
-   van   
-   truck   
-   tricycle   
-   awning-tricycle   
-   bus   
-   motor   
-   others   
+   ------------------------------------------------------------------------------------------------------------------------------   
 
 ## Notice
 1. this script will set param "difficult" in voc annotation according to param "occlusion" in visdrone annotation.  
    In particulary,  
+   no occlusion = 0 (occlusion ratio 0%) -> difficult = 0 (easy to detect)  
+   partial occlusion = 1 (occlusion ratio 1% ~ 50%) -> difficult = 0 (easy to detect)  
+   heavy occlusion = 2 (occlusion ratio 50% ~ 100%) -> difficult = 1 (difficult to detect)  
+2. _Do not change the classes order_.
